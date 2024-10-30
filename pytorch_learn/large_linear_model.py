@@ -18,7 +18,6 @@ def train(epochs=10000, learning_rate=1e-4):
 
     return w, loss
 
-#%%
 def draw(output, loss):
     if CUDA:
         output = output.cpu()
