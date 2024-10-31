@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from torch import nn
 # import fastai.vision
 import d2l.torch as d2l
+
+
 class AlexNet(nn.Module):
     def __init__(self):
         super(AlexNet,self).__init__()
@@ -63,5 +65,5 @@ net = nn.Sequential(
 batch_size = 128
 train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size, resize=224)
 
-lr, num_epochs = 0.01, 10
+lr, num_epochs = 0.01, 1
 d2l.train_ch6(net, train_iter, test_iter, num_epochs, lr, d2l.try_gpu())
