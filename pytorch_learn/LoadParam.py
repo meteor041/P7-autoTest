@@ -1,17 +1,9 @@
 import torch
-import torch.nn.functional as F
-from torch import nn, optim
+from torch import nn
 import os
 from torchvision import datasets, transforms
 
-
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.1307,), (0.3081,))
-])
-trainset = datasets.MNIST('data', train=True, download=True, transform=transform)
-testset = datasets.MNIST('data', train=False, download=True, transform=transform)
-
+CUDA = torch.cuda.is_available()
 class LeNet(nn.Module):
     def __init__(self):
         super(LeNet, self).__init__()
@@ -37,42 +29,9 @@ class LeNet(nn.Module):
             num_feature = num_feature * s
         return num_feature
 
-CUDA = torch.cuda.is_available()
-if CUDA:
-    lenet = LeNet().cuda()
-else:
-    lenet = LeNet()
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(lenet.parameters(), lr=0.001, momentum=0)
-
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=4)
-
-
-def train(model, criterion, optimizer, epochs=1):
-    for epoch in range(epochs):
-        running_loss = 0.0
-        for i, data in enumerate(trainloader, 0):
-            inputs, labels = data
-            if CUDA:
-                inputs, labels = inputs.cuda(), labels.cuda()
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-
-            running_loss += loss.item()
-            if i % 1000 == 999:
-                print('[Epoch:%d, Batch:%5d] Loss: %.3f' % (epoch+1, i+1, running_loss / 1000))
-                running_loss = 0.0
-    print('Finish training')
-
-
 def load_param(model, path):
     if os.path.exists(path):
-        # model.load_state_dict(torch.load(path))
-        model.load_state_dict(torch.load(path, weights_only=True))
+        model.load_state_dict(torch.load(path))
 
 def save_param(model, path):
     torch.save(model.state_dict(), path)
@@ -90,11 +49,14 @@ def test(testloader, model):
         correct += (predicted == labels).sum()
     print('Accuracy of the network on the test set: %d %%' % (100 * correct / total))
 
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,))
+])
+
 testset = datasets.MNIST('data', train=False, download=True, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
-
 if __name__ == '__main__':
-    # train(lenet, criterion, optimizer, epochs=2)
-    # save_param(lenet, 'lenet.pkl')
-    load_param(lenet, 'lenet.pkl')
+    lenet = LeNet()
+    load_param(lenet, 'lenet.kpl')
     test(testloader, lenet)
