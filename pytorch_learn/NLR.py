@@ -16,7 +16,7 @@ class Net(nn.Module):
         self.out = nn.Linear(num_hidden, outputs)
 
     def forward(self, x):
-        x = F.relu(self.hidden(x))
+        x = F.sigmoid(self.hidden(x))
         x = self.out(x)
         return x
 
